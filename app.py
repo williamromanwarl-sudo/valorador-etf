@@ -1,38 +1,87 @@
 import streamlit as st
+import yfinance as yf
 from valorador_pro import score_inteligente, recomendacion
 
+# Configuración de página
 st.set_page_config(page_title="Valorador ETF", layout="centered")
 
 st.title("📊 Valorador Inteligente de ETFs")
 
+# Input
 ticker = st.text_input("Ingresa el ticker (VOO, QQQ, VT...)")
 
 if ticker:
-    r = score_inteligente(ticker.upper())
+    ticker = ticker.upper()
+    r = score_inteligente(ticker)
 
+    # 🧠 NOMBRE
+    st.title(f"📊 {r['nombre']}")
+
+    # 📊 DATOS PRINCIPALES
     st.subheader("📌 Datos principales")
-    st.write(f"Precio: ${r['precio']}")
-    st.write(f"Edad: {r['edad']} años")
-    st.write(f"Tipo: {r['tipo']}")
-    st.write(f"CAGR 5Y: {r['cagr']}%")
-    st.write(f"YTD: {r['ytd']}%")
-    st.write(f"P/E: {r['pe']}")
-    st.write(f"Beta: {r['beta']}")
+
+    col1, col2 = st.columns(2)
+
+    with col1:
+        st.metric("💰 Precio", f"${r['precio']}")
+        st.metric("📅 Edad", f"{r['edad']} años")
+        st.metric("📈 CAGR 5Y", f"{r['cagr']}%")
+
+    with col2:
+        st.metric("📊 YTD", f"{r['ytd']}%")
+        st.metric("📉 P/E", f"{round(r['pe'],2) if r['pe'] else 'N/A'}")
+        st.metric("⚡ Beta", f"{r['beta']}")
+
+    # 💵 DIVIDENDO
+    st.subheader("💵 Dividendos")
 
     if r["dividend"]:
-        st.write(f"Dividend Yield: {round(r['dividend']*100,2)}%")
+        st.metric("Dividend Yield", f"{round(r['dividend']*100,2)}%")
     else:
-        st.write("Dividend Yield: No disponible")
+        st.metric("Dividend Yield", "No disponible")
 
+    # 📊 52 WEEK RANGE
+    if r["low_52"] and r["high_52"]:
+        st.subheader("📊 52 Week Range")
+        st.write(f"${round(r['low_52'],2)}  →  ${round(r['high_52'],2)}")
+
+    # ⭐ SCORE
     st.subheader("⭐ Score")
-    st.write(f"Rentabilidad: {r['rent']} / 5")
-    st.write(f"Crecimiento: {r['growth']} / 5")
-    st.write(f"Durabilidad: {r['dura']} / 5")
-    st.write(f"Dividendo: {r['div']} / 5")
-    st.write(f"Historial: {r['hist']} / 5")
-    st.write(f"Valoración: {r['val']} / 5")
+
+    col1, col2, col3 = st.columns(3)
+
+    col1.metric("Rentabilidad", r["rent"])
+    col2.metric("Crecimiento", r["growth"])
+    col3.metric("Durabilidad", r["dura"])
+
+    col1.metric("Dividendo", r["div"])
+    col2.metric("Historial", r["hist"])
+    col3.metric("Valoración", r["val"])
 
     st.success(f"⭐ Score Final: {r['score']} / 5")
 
+    # 🧠 TIPO
+    st.subheader("🧠 Tipo de ETF")
+    st.info(r["tipo"])
+
+    # 🎯 DECISIÓN
     st.subheader("🎯 Decisión")
-    st.write(recomendacion(r['score'], r['val'], r['growth']))
+
+    decision = recomendacion(r['score'], r['val'], r['growth'])
+
+    if "COMPRAR" in decision:
+        st.success(decision)
+    elif "CAÍDAS" in decision:
+        st.warning(decision)
+    else:
+        st.error(decision)
+
+    # 📈 GRÁFICO
+    st.subheader("📈 Precio (último año)")
+
+    data = yf.Ticker(ticker).history(period="1y")
+
+    if not data.empty:
+        st.line_chart(data["Close"])
+    else:
+        st.write("No hay datos disponibles")

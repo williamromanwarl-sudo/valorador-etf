@@ -10,22 +10,36 @@ def obtener_precio(info, obj):
     return precio
 
 
-def obtener_dividend_yield(obj, precio):
+def obtener_dividend_yield(obj, precio, info):
     try:
+        # 1. Método principal (dividendos reales)
         dividends = obj.dividends
-        if dividends.empty or not precio:
-            return None
 
-        hoy = datetime.now()
-        hace_1y = hoy - timedelta(days=365)
+        if not dividends.empty and precio:
+            from datetime import datetime, timedelta
+            hoy = datetime.now()
+            hace_1y = hoy - timedelta(days=365)
 
-        ultimos = dividends.loc[dividends.index >= hace_1y]
-        total_div = ultimos.sum()
+            ultimos = dividends.loc[dividends.index >= hace_1y]
+            total_div = ultimos.sum()
 
-        return total_div / precio if total_div > 0 else None
-    except:
+            if total_div > 0:
+                return total_div / precio
+
+        # 2. Fallback Yahoo directo
+        dy = info.get("dividendYield", None)
+        if dy:
+            return dy
+
+        # 3. Fallback manual
+        div_rate = info.get("trailingAnnualDividendRate", None)
+        if div_rate and precio:
+            return div_rate / precio
+
         return None
 
+    except:
+        return None
 
 def obtener_cagr(ticker):
     try:
@@ -78,12 +92,15 @@ def clasificar_etf(info, dividend, cagr):
 def score_inteligente(ticker):
     obj = yf.Ticker(ticker)
     info = obj.info
+    nombre = info.get("longName", ticker)
+    low_52 = info.get("fiftyTwoWeekLow", None)
+    high_52 = info.get("fiftyTwoWeekHigh", None)
 
     pe = info.get("trailingPE", None)
     beta = info.get("beta", 1)
 
     precio = obtener_precio(info, obj)
-    dividend = obtener_dividend_yield(obj, precio)
+    dividend = obtener_dividend_yield(obj, precio, info)
     cagr = obtener_cagr(ticker)
     ytd = obtener_ytd(ticker)
     edad = obtener_edad(ticker)
@@ -131,6 +148,9 @@ def score_inteligente(ticker):
         "hist": hist,
         "val": val,
         "score": score
+        "nombre": nombre,
+        "low_52": low_52,
+        "high_52": high_52,
     }
 
 
