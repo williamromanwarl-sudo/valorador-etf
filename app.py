@@ -47,7 +47,6 @@ if ticker:
     col2.metric("Crecimiento", r["growth"])
     col3.metric("Durabilidad", r["dura"])
 
-    col1.metric("Dividendo", r["div"])
     col2.metric("Historial", r["hist"])
     col3.metric("Valoración", r["val"])
 
