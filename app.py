@@ -32,13 +32,6 @@ if ticker:
         st.metric("📉 P/E", f"{round(r['pe'],2) if r['pe'] else 'N/A'}")
         st.metric("⚡ Beta", f"{r['beta']}")
 
-    # 💵 DIVIDENDO
-    st.subheader("💵 Dividendos")
-
-    if r["dividend"]:
-        st.metric("Dividend Yield", f"{round(r['dividend']*100,2)}%")
-    else:
-        st.metric("Dividend Yield", "No disponible")
 
     # 📊 52 WEEK RANGE
     if r["low_52"] and r["high_52"]:

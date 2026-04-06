@@ -128,8 +128,8 @@ def score_inteligente(ticker):
         val = 3
 
     score = round(
-        rent * 0.25 + growth * 0.20 + dura * 0.20 +
-        div * 0.10 + hist * 0.15 + val * 0.10, 2
+        rent * 0.30 + growth * 0.25 + dura * 0.20 +
+        hist * 0.15 + val * 0.10, 2
     )
 
     return {
