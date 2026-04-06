@@ -147,7 +147,7 @@ def score_inteligente(ticker):
         "div": div,
         "hist": hist,
         "val": val,
-        "score": score
+        "score": score,
         "nombre": nombre,
         "low_52": low_52,
         "high_52": high_52,
