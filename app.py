@@ -8,11 +8,22 @@ st.set_page_config(page_title="Valorador ETF", layout="centered")
 st.title("📊 Valorador Inteligente de ETFs")
 
 # Input
-ticker = st.text_input("Ingresa el ticker (VOO, QQQ, VT...)")
+ticker = st.text_input("Ingresa el ticker")
+analizar = st.button("Analizar")
+
+if analizar and ticker:
 
 if ticker:
     ticker = ticker.upper()
-    r = score_inteligente(ticker)
+   r = analizar_ticker(ticker)
+try:
+    r = analizar_ticker(ticker.upper())
+
+except Exception:
+    st.error(
+        "Yahoo Finance está limitando temporalmente las consultas. Intenta nuevamente en unos minutos."
+    )
+    st.stop()
 
     # 🧠 NOMBRE
     st.title(f"📊 {r['nombre']}")
