@@ -13,18 +13,17 @@ analizar = st.button("Analizar")
 
 if analizar and ticker:
 
-if ticker:
     ticker = ticker.upper()
-   r = analizar_ticker(ticker)
-try:
-    r = analizar_ticker(ticker.upper())
 
-except Exception:
-    st.error(
-        "Yahoo Finance está limitando temporalmente las consultas. Intenta nuevamente en unos minutos."
-    )
-    st.stop()
+    try:
+        r = analizar_ticker(ticker)
 
+    except Exception:
+        st.error(
+            "Yahoo Finance está limitando temporalmente las consultas. Intenta nuevamente en unos minutos."
+        )
+        st.stop()
+        
     # 🧠 NOMBRE
     st.title(f"📊 {r['nombre']}")
 
